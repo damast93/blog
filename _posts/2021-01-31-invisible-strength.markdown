@@ -145,8 +145,10 @@ $$
 $$
 
 > **Exercise** Show that equivariant maps $$X \to Y$$ are precisely the *invariant* elements of $$X \Rightarrow Y$$
->
+
 > **Exercise** Derive the permutation action from the set-theoretic encoding of the function $$f$$ as its graph.
+
+> **Exercise** Show that the only subobjects of $$\mathbb A$$ are $$\emptyset$$ and $$\mathbb A$$. On the other hand, the internal powerset $$2^\mathbb A$$ can be identified with the subsets of atoms that are finite or co-finite.
 
 To summarize: Homsets in **Nom** are very manageable: Equivariance is a powerful restriction. Exponentials have a lot going on, all possible finite exceptions to equivariance. We can already see why strength will become important. Making some construction on **Nom** a functor is easy, as we just need to deal with equivariant maps. Making it strong means enriching it, i.e. dealing with all the finite support business. That is, the trouble of renaming.
 
@@ -210,7 +212,7 @@ We recap: In name generation, the strength is exactly where the difficult busine
 
 # Give me the Strength to Rename Things
 
-Let's develop these ideas in Haskell. We can represent atoms by mere numbers, wrapped in their own type
+Let's develop these ideas in Haskell.  We can start by representing atoms by mere numbers, wrapped in their own type
 
 ```haskell
 {-#LANGUAGE GADTs, ExistentialQuantification, StandaloneDeriving, FlexibleInstances #-}
@@ -221,8 +223,6 @@ import Data.List (intercalate)
 
 import Data.Set (Set,(\\),empty)
 import qualified Data.Set as Set
-
-import Perm -- some library for permutations
 
 newtype A = Atom Int deriving (Eq,Ord)
 
@@ -238,7 +238,17 @@ e = Atom 5
 f = Atom 6
 ```
 
-One way of implementing nominal sets `X` is by specifying how permutations act on each `x :: X`. Because every finite permutation decomposes into transpositions, it is enough to specify how to swap pairs of atoms. Secondly, we need to give for every `x` its support, the set of atoms it mentions (or treats non-uniformly). In Haskell, we generally can't compute exactly which names get used. So we'll relax our supports to a mere superset of the names mentioned.  
+One way of implementing nominal sets `X` is by specifying two things
+* How permutations act on each element `x`
+* What the support of each `x` is 
+
+The permutation part is easy: Because every finite permutation decomposes into transpositions, it is enough to specify how to swap pairs of atoms.
+
+I haven't told you so far what a support is: Intuitively, a set $$A$$ of atoms *supports* $$x \in X$$ if it contains all the names which $$x$$ mentions. Formally, every permutation which fixes all atoms in $$A$$ also fixes $$x$$. For a nominal set, it is required by definition that every element have some finite set of names supporting it. One can show that there is a least set supporting it, called *the support* of $$x$$. 
+
+> **Exercise** Show that the support of $$(a,b) \in \mathbb A \times \mathbb A$$ is $$\{a,b\}$$. Show that the support of $$\lambda b.[a=b] \in 2^\mathbb A$$ is $$\{a\}$$. Show that the support of $$\{a\}a \in T\mathbb A$$ is empty.
+
+In Haskell, we generally unable to compute exactly which names get used in an expression. But we can keep track of some superset, i.e. return for every element `x` some set of names supporting it. 
 
 ```haskell
 -- Holy guarantee: Every function x -> y between nominal sets shall be equivariant
@@ -286,7 +296,14 @@ instance Nom (Set A) where
     swap t xs = Set.map (swap t) xs
 ```
 
-The difficult part is how to represent finitely supported functions. The Haskell function type `a -> b` is opaque; we cannot analyze the body of a function to find out which names it uses. We must find some sort of explicit representation for finitely supported functions. 
+We test out the capabilities of the `Nom` class
+
+```haskell
+supp (a,b) == fromList [a,b]
+swap (a,b) (a, 42) == (b, 42)
+```
+
+The most difficult part is how to represent finitely supported functions: The Haskell function type `a -> b` is opaque; we cannot analyze the body of a function to find out which names it uses. So we must find some sort of explicit representation for finitely supported functions, that keeps track of names in terms of simpler nominal sets.
 
 Recall how we discovered the need for finitely supported functions in the first place. If $$F : X \times C \to Y$$ is equivariant and $$c \in C$$, then the closure $$f=F(-,c)$$ is generally not equivariant but finitely supported, and the datum $$c$$ captures the amount of asymmetry that $$f$$ is allowed. It turns out that every finitely supported function is of this form.
 
@@ -328,17 +345,18 @@ instance Nom (Fs x y) where
 We can lift equivariant functions to `Fs` by choosing $$C=1$$, and define composition as follows
 
 ```haskell
-ev :: Fs x y -> x -> y
-ev = curry eval -- for convenience, treat a Fs as a Haskell function (violates holy guarantee)
+ev :: Fs x y -> x -> y 
+ev = curry eval -- for convenience (violates holy guarantee)
 
 lift :: (x -> y) -> Fs x y
-lift f = transpose body () where body ((),x) = f x -- equivariant functions need no datum
-
-tensor :: Fs x y -> Fs z w -> Fs (x,z) (y,w)
-tensor = curry (transpose prod) where prod ((f,g),(x,z)) = (ev f x, ev g z)
+lift f = Closure body () where body (x,()) = f x 
 
 o :: Fs y z -> Fs x y -> Fs x z
 o (Closure f c) (Closure g d) = Closure comp (c,d) where comp (x,(c,d)) = f(g(x,d),c)
+
+tensor :: Fs x y -> Fs z w -> Fs (x,z) (y,w)
+tensor (Closure f c) (Closure g d) = Closure body (c,d)
+  where body ((x,z), (c,d)) =(f(x,c), g(z,d))
 ```
 
 We can now define a framework for strong/enriched nominal functors, which we call `Strong` 
@@ -349,14 +367,12 @@ class Strong f where
     smap :: (Nom x, Nom y) => (Fs x y) -> Fs (f x) (f y)
 ```
 
-We can derive the strength from `smap` as follows
+From enriched `smap`, we can derive an explicit strength as follows
 
 ```haskell
 str :: (Strong f, Nom x, Nom y) => (x, f y) -> f (x,y)
-str = uncurry (ev . smap . (transpose id))
+str (x, m) = ev (smap (transpose id x)) m
 ```
-
-
 
 Representatives for the name-generation monad are straightforward to define
 
