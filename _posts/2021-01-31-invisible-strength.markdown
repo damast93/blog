@@ -5,7 +5,7 @@ date:   2021-01-31 18:22:29 +0100
 categories: jekyll update
 usemathjax: true
 ---
-# Strong monads and $$\alpha$$-conversion
+# Strong monads and α-conversion
 
 Maybe the most famous piece of Haskell wisdom is that *effectful computation* corresponds to *monads*. The idea goes back to Moggi's 1991 paper "Notions of computations and monads". It's often overlooked that from this paper to the popular wisdom, a tiny adjective went missing: Effectful computation corresponds to *strong* monads. Indeed, from the semantics it is clear why any old monad is not enough: An effectful computation $$\Gamma \vdash u : A$$ is interpreted as a morphism $$u : \Gamma \to TA$$ where $$T$$ is the monad. Let us try to interpret sequencing of effectful programs:
 
@@ -113,7 +113,7 @@ I'll use one of my favourite examples in all of category theory: Nominal Sets. T
 Nominal sets are like sets, but instead of building everything from sets-containing-empty sets, there are *atoms* written $$a,b,c,\ldots$$ All the atoms are collected into a nominal set called $$\mathbb A$$. The crux is that these atoms are all indistinguishable, and we ought to treat them uniformly. A morphism of nominal sets $$f : X \to Y$$ is thus an *equivariant function*, that is for every permutation $$\pi$$ of atoms, we have $$f(\pi \cdot x) = \pi \cdot f(x)$$. Here, we apply a permutation to an element by applying it to all the atoms it uses, e.g. if $$\pi = (a\, b)$$ is the transposition swapping atoms $$a$$ and $$b$$, then 
 
 $$
-\pi \cdot \{a,\{42,b\},c\} = \pi \cdot \{b,\{42,a\},c\}
+\pi \cdot \{a,\{42,b\},c\} = \{b,\{42,a\},c\}
 $$
 
 > **Exercise** Show that there is only one equivariant function $$\mathbb A \to \mathbb A$$. There are no equivariant functions $$1 \to \mathbb A$$. That is, no atoms are visible externally.
@@ -215,7 +215,7 @@ We recap: In name generation, the strength is exactly where the difficult busine
 Let's develop these ideas in Haskell.  We can start by representing atoms by mere numbers, wrapped in their own type
 
 ```haskell
-{-#LANGUAGE GADTs, ExistentialQuantification, StandaloneDeriving, FlexibleInstances #-}
+{-# LANGUAGE GADTs, ExistentialQuantification, StandaloneDeriving, FlexibleInstances #-}
 
 module Nom where
 
@@ -407,6 +407,8 @@ instance Functor T where
 
 joinT (Res as (Res bs x)) = Res (Set.union as bs) x
 returnT x = Res empty x
+
+-- standard implementations from here ...
 bindT t f = joinT (fmap f t) 
 
 instance Applicative T where
