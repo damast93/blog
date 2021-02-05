@@ -155,7 +155,7 @@ To summarize. Homsets in **Nom** are very manageable, equivariance is a powerful
 
 # Name Generation: Heavy Lifting
 
-Nominal sets are useful in computer science because they can model renaming and generativity, that is whenever people write `new`. The purest instance of this is name generation: A fresh name should be, well, fresh, and not equal to any previous name. Think metaprogramming, where we want to pick variable names that don't accidentally clash with anything else (`gensym`). Other examples are GUIDs, memory locations, etc.
+Nominal sets are useful in computer science because they can model renaming and generativity, that is whenever people write `new`. They form the basis of languages such as [Fresh OCaml](http://www.fresh-ocaml.org/). The purest instance of generativity is name generation: A fresh name should be, well, fresh, and not equal to any previous name. Think metaprogramming, where we want to pick variable names that don't accidentally clash with anything else (`gensym`). Other examples are GUIDs, memory locations, etc.
 
 Using nominal sets, we can use atoms for names. Generating fresh names is an effect, and thus modelled by a strong monad $$T$$ on **Nom** which is commonly called the *name-generation monad*. There is a morphism $$\nu : 1 \to T\mathbb A$$ for making a fresh name, and the program
 
@@ -462,7 +462,7 @@ sbind :: (Nom a, Nom x, Nom y) => (a, T x) -> ((a,x) -> T y) -> T y
 sbind (a,x) f = str (a,x) >>= f
 ```
 
-You can find the source code of the `Nom` class [here](https://github.com/damast93/blog/tree/master/_posts/2021-01-31-invisible-strength).
+You can find the full source of the `Nom` implementation [here](https://github.com/damast93/blog/tree/master/_posts/2021-01-31-invisible-strength).
 
 # Demo
 
