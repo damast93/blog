@@ -34,7 +34,7 @@ w
 \end{matrix}
 $$
 
-that is, independent program lines can be reordered. This is generally false for state-like effect. Importantly, it does hold for [probability-like](http://www.cs.ox.ac.uk/people/samuel.staton/papers/esop2017.pdf) effects by Fubini's theorem, to the extent that one might view any commutative monads as [some sort](https://arxiv.org/abs/1908.07021) of [probability theory](https://arxiv.org/abs/1908.07021).
+that is, independent program lines can be reordered. This is generally false for state-like effect. Importantly, it does hold for [probability-like](http://www.cs.ox.ac.uk/people/samuel.staton/papers/esop2017.pdf) effects by Fubini's theorem, to the extent that one might view any commutative monads as [some sort](https://arxiv.org/abs/1108.5952) of [probability theory](https://arxiv.org/abs/1908.07021).
 
 Why is it that strength is often overlooked, or seems an unintuitive or uninteresting technical condition? As we'll see below, often a *default strength* exists which does very little. We'll seek some instructive example, where the strength does some heavy lifting: $$\alpha$$-conversion.
 
@@ -98,7 +98,7 @@ $$
 \widetilde F_{X,Y} : (X \Rightarrow Y) \to (FX \Rightarrow FY)
 $$
 
-A functor that admits such an internal action is called *enriched* (as in, enriched category theory). In general, the exponential can be much more complicated than the homset, and the homset action of $F$ fixes $$\widetilde F_{X,Y}$$ only on global elements. Our argument goes both ways and can be used to show the following proposition:
+A functor that admits such an internal action is called *enriched* (as in, enriched category theory). In general, the exponential can be much more complicated than the homset, and the homset action of $$F$$ fixes $$\widetilde F_{X,Y}$$ only on global elements. Our argument goes both ways and can be used to show the following proposition:
 
 > **[Proposition](https://ncatlab.org/nlab/show/tensorial+strength#description)** To give a strength for a functor is to give an enrichment.
 
@@ -118,7 +118,7 @@ $$
 
 > **Exercise** Show that there is only one equivariant function $$\mathbb A \to \mathbb A$$. There are no equivariant functions $$1 \to \mathbb A$$. That is, no atoms are visible externally.
 
-> **Exercise** Let $$X=\{ \{a,b\} : a, b \in \mathbb A,  a \neq b \}$$, $$Y=\{(a,b) : a,b \in \mathbb A, a \neq b \}$$ and $$p : Y \to X, (a,b) \mapsto \{a,b\}$$. Show that $$p$$ is equivariant and surjective, but has no equivariant section. That is, the axiom of choice fails in nominal sets. *Hint* Show that there is no equivariant map $$X \to \mathbb A$$.
+> **Exercise** Let $$X=\{ \{a,b\} : a, b \in \mathbb A,  a \neq b \}$$, $$Y=\{(a,b) : a,b \in \mathbb A, a \neq b \}$$ and $$p : Y \to X, (a,b) \mapsto \{a,b\}$$. Show that $$p$$ is equivariant and surjective, but has no equivariant section. That is, the axiom of choice fails in nominal sets. *Hint*: Show that there is no equivariant map $$X \to \mathbb A$$.
 
 The category **Nom** of nominal sets has exponentials (and much more - it is a Grothendieck topos), but their underlying set is *not* the set of equivariant functions. For example, we ought to have $$(1 \Rightarrow \mathbb A) \cong \mathbb A$$ but $$\mathbf{Nom}(1,\mathbb A) = \emptyset$$. Similarly, consider the equality test
 
@@ -150,7 +150,7 @@ $$
 
 > **Exercise** Show that the only subobjects of $$\mathbb A$$ are $$\emptyset$$ and $$\mathbb A$$. On the other hand, the internal powerset $$2^\mathbb A$$ can be identified with the subsets of atoms that are finite or co-finite.
 
-To summarize: Homsets in **Nom** are very manageable: Equivariance is a powerful restriction. Exponentials have a lot going on, all possible finite exceptions to equivariance. We can already see why strength will become important. Making some construction on **Nom** a functor is easy, as we just need to deal with equivariant maps. Making it strong means enriching it, i.e. dealing with all the finite support business. That is, the trouble of renaming.
+To summarize. Homsets in **Nom** are very manageable, equivariance is a powerful restriction. Exponentials have a lot going on, all possible finite exceptions to equivariance. We can already see why strength will become important. Making some construction on **Nom** a functor is easy, as we just need to deal with equivariant maps. Making it strong means enriching it, i.e. dealing with all the finite support business. That is, the trouble of renaming.
 
 
 # Name Generation: Heavy Lifting
@@ -244,11 +244,11 @@ One way of implementing nominal sets `X` is by specifying two things
 
 The permutation part is easy: Because every finite permutation decomposes into transpositions, it is enough to specify how to swap pairs of atoms.
 
-I haven't told you so far what a support is: Intuitively, a set $$A$$ of atoms *supports* $$x \in X$$ if it contains all the names which $$x$$ mentions. Formally, every permutation which fixes all atoms in $$A$$ also fixes $$x$$. For a nominal set, it is required by definition that every element have some finite set of names supporting it. One can show that there is a least set supporting it, called *the support* of $$x$$. 
+I haven't told you so far what support are: Intuitively, a set $$A$$ of atoms *supports* $$x \in X$$ if it contains all the atoms which $$x$$ mentions. Formally, every permutation which fixes all atoms in $$A$$ also fixes $$x$$. For a nominal set, it is required by definition that every element have some finite set of atoms supporting it. One can then show that there is a least set supporting it, called *the support* of $$x$$. 
 
 > **Exercise** Show that the support of $$(a,b) \in \mathbb A \times \mathbb A$$ is $$\{a,b\}$$. Show that the support of $$\lambda b.[a=b] \in 2^\mathbb A$$ is $$\{a\}$$. Show that the support of $$\{a\}a \in T\mathbb A$$ is empty.
 
-In Haskell, we generally unable to compute exactly which names get used in an expression. But we can keep track of some superset, i.e. return for every element `x` some set of names supporting it. 
+In Haskell, we are generally unable to compute exactly which names get used by an expression. But we can keep track of some superset of the atoms, i.e. return for every element `x` some set of atoms supporting it. 
 
 ```haskell
 -- Holy guarantee: Every function x -> y between nominal sets shall be equivariant
@@ -491,7 +491,7 @@ demo =
     return (x,y)))
 ```
 
-Now we can use `sbind` everywhere insteaf of `>>=`, the explicit bind-with-context of strong monads. 
+Now we can use `sbind` everywhere instead of `>>=`, the explicit bind-with-context of strong monads. 
 
 ```haskell
 correct_demo :: T (A,A)
