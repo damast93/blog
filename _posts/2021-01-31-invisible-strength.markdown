@@ -462,6 +462,8 @@ sbind :: (Nom a, Nom x, Nom y) => (a, T x) -> ((a,x) -> T y) -> T y
 sbind (a,x) f = str (a,x) >>= f
 ```
 
+You can find the source code of the `Nom` class [here](https://github.com/damast93/blog/tree/master/_posts/2021-01-31-invisible-strength).
+
 # Demo
 
 Let's test our framework. Recall the definition of $$\nu = \{a\}a \in T\mathbb A$$, i.e.
@@ -501,5 +503,7 @@ correct_demo =
    return (x,y)))
 ```
 
-  We obtain the correct output $$\{a,b\}(a,b)$$.
+ We obtain the correct output $$\{a,b\}(a,b)$$.
+
+
 
